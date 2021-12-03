@@ -2,9 +2,9 @@
 #include <stdlib.h>
 
 
-int	put_digit(char **tab, int *remains, int index_lenght, char search) {
+int	put_digit(char **tab, int *remains, int index_lenght, char search, int tab_depth) {
 	int	res_loop = 0;
-	for (int depth = 0; depth < 1000; depth++)
+	for (int depth = 0; depth < tab_depth; depth++)
 	{
 		if (tab[depth][index_lenght] != search && remains[depth] == 0) {
 			res_loop++;
@@ -14,14 +14,12 @@ int	put_digit(char **tab, int *remains, int index_lenght, char search) {
 	return res_loop;
 }
 
-int	ft_total_remains(int *remains)
+int	ft_total_remains(int *remains, int tab_depth)
 {
 	int	res = 0;
-	for (int i = 0; i < 1000; i++)
-	{
+	for (int i = 0; i < tab_depth; i++)
 		if (remains[i] == 0)
 			res++;
-	}
 	return res;
 }
 
@@ -54,30 +52,30 @@ int main(int ac, char **av)
 	int		Oxy_res = 0;
 	int		CO2_res = 0;
 
-	tab = calloc(1000, sizeof(char*));
-	remains = calloc(1000, sizeof(int));
+	tab = calloc(tab_depth, sizeof(char*));
+	remains = calloc(tab_depth, sizeof(int));
 	if (tab == NULL) {
 		printf("calloc first tab failed\n");
 		return 1;
 	}
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < tab_depth; i++) {
 		tab[i] = calloc(20, sizeof(char));
 		if (tab[i] == NULL) {
 			printf("calloc second tab [%d] failed\n", i);
 			return 2;
 		}
 	}
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < tab_depth; i++) {
 		res_gl = getline(&tab[i], &n, stdin);
 		if (res_gl == -1) {
 			printf("getline failed on line [%d]\n", i);
 			return 3;
 		}
 	}
-
+	total_rem = ft_total_remains(remains, tab_depth);
 	while (total_rem > 1) {
 		//calcul all 0 or 1 in a certain index
-		for (int depth = 0; depth < 1000; depth++) {
+		for (int depth = 0; depth < tab_depth; depth++) {
 			if (tab[depth][index_lenght] == '0' && remains[depth] == 0) {
 				zero++;
 			}
@@ -86,27 +84,31 @@ int main(int ac, char **av)
 			}
 		}
 		if (one > zero) {
-			put_digit(tab, remains, index_lenght, '1');
+			put_digit(tab, remains, index_lenght, '1', tab_depth);
 		} else if (one == zero) {
-			put_digit(tab, remains, index_lenght, '1');
-		} else {
-			put_digit(tab, remains, index_lenght, '0');
+			put_digit(tab, remains, index_lenght, '1', tab_depth);
+		} else if (zero > one){
+			put_digit(tab, remains, index_lenght, '0', tab_depth);
 		}
-		total_rem = ft_total_remains(remains);
+		zero = 0;
+		one = 0;
+		total_rem = ft_total_remains(remains, tab_depth);
 		index_lenght++;
 	}
-	for (int i = 0; i < 1000; i++) {
-		if (remains[i] == 0)
+	for (int i = 0; i < tab_depth; i++) {
+		if (remains[i] == 0) {
 			Oxy_res = binaire_to_digit(tab[i]);
+		}
 	}
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < tab_depth; i++)
 		remains[i] = 0;
-	total_rem = 0;
+	total_rem = tab_depth;
 	zero = 0;
 	one = 0;
+	index_lenght = 0;
 	while (total_rem > 1) {
 		//calcul all 0 or 1 in a certain index
-		for (int depth = 0; depth < 1000; depth++) {
+		for (int depth = 0; depth < tab_depth; depth++) {
 			if (tab[depth][index_lenght] == '0' && remains[depth] == 0) {
 				zero++;
 			}
@@ -115,20 +117,24 @@ int main(int ac, char **av)
 			}
 		}
 		if (one < zero) {
-			put_digit(tab, remains, index_lenght, '1');
+			put_digit(tab, remains, index_lenght, '1', tab_depth);
 		} else if (one == zero) {
-			put_digit(tab, remains, index_lenght, '0');
-		} else {
-			put_digit(tab, remains, index_lenght, '0');
+			put_digit(tab, remains, index_lenght, '0', tab_depth);
+		} else if (zero < one){
+			put_digit(tab, remains, index_lenght, '0', tab_depth);
 		}
-		total_rem = ft_total_remains(remains);
+		zero = 0;
+		one = 0;
+		total_rem = ft_total_remains(remains, tab_depth);
 		index_lenght++;
 	}
-	for ( int i = 0; i < 1000; i++)
-		if (remains[i] == 0)
+	for ( int i = 0; i < tab_depth; i++) {
+		if (remains[i] == 0) {
 			CO2_res = binaire_to_digit(tab[i]);
-	printf("master_res = %d\n", CO2_res * Oxy_res);
-	for (int i = 0; i < 1000; i++)
+		}
+	}
+	printf("%d\n", CO2_res * Oxy_res);
+	for (int i = 0; i < tab_depth; i++)
 		free(tab[i]);
 	free(tab);
 }
