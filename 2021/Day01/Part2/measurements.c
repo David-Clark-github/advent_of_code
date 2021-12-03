@@ -24,7 +24,7 @@ int main(int ac, char **av)
 	int		master_res = 0;
 	tab = calloc(2000, sizeof(char *) * 2000);
 	for (int i = 0; i < 2000; i++)
-		tab[i] = calloc(1, sizeof(char) * 2000);
+		tab[i] = calloc(1, sizeof(char) * 20);
 	for (int i = 0; res_gl != -1; i++) {
 		res_gl = getline(&tab[i], &n, stdin);
 	}
