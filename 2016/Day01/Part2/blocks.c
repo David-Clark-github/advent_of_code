@@ -11,42 +11,45 @@
 */
 	
 typedef struct santa_direction {
-	int	N;
-	int	S;
-	int	E;
-	int	W;
+	int	x;
+	int	y;
 	int	d;
 }				s_santa;
 
 int	add_pos(s_santa *log, s_santa pos)
 {
 	static int len;
-	log[len].N = pos.N;
-	log[len].S = pos.S;
-	log[len].E = pos.E;
-	log[len].W = pos.W;
+	log[len].x = pos.x;
+	log[len].y = pos.y;
 	len++;
 	return len;
 }
 
-void	check_pos(s_santa *log, int len_log, s_santa ongoing)
+int	check_pos(s_santa *log, int len_log, s_santa ongoing)
 {
 	int check = 0;
+	int	res_x = 0;
+	int	res_y = 0;
 	for (int i = 0; i < len_log; i++)
 	{
-		if (log[i].N == ongoing.N)
+		if (log[i].x == ongoing.x)
 			check++;
-		if (log[i].S == ongoing.S)
+		if (log[i].y == ongoing.y)
 			check++;
-		if (log[i].E == ongoing.E)
-			check++;
-		if (log[i].W == ongoing.W)
-			check++;
-		if (check == 4) {
-			printf("N = %d\nS = %d\nE = %d\nW = %d\n", ongoing.N, ongoing.S, ongoing.E, ongoing.W);
+		if (check == 2) {
+			if (ongoing.x < 0)
+				res_x = ongoing.x * -1;
+			else 
+				res_x = ongoing.x;
+			if (ongoing.y < 0)
+				res_y = ongoing.y * -1;
+			else 
+				res_y = ongoing.y;
+			return (res_x + res_y);
 		}
 		check = 0;
 	}
+	return -1;
 }
 
 int main(int ac, char **av)
@@ -58,10 +61,9 @@ int main(int ac, char **av)
 	char	*buffer;
 	int		i_b = 0;
 	int	len_log = 0;
-	santa.N = 0;
-	santa.S = 0;
-	santa.E = 0;
-	santa.W = 0;
+	int	res;
+	santa.x = 0;
+	santa.y = 0;
 	santa.d = 1;
 	buffer = (char *)calloc(900, sizeof(char));
 	log = (s_santa *)calloc(200, sizeof(s_santa));
@@ -80,21 +82,39 @@ int main(int ac, char **av)
 			}
 		}
 		i_b++;
-		if (santa.d == 1) {
-			santa.N += atoi(&buffer[i_b]);
-			santa.S -= atoi(&buffer[i_b]);
-		} else if (santa.d == 2) {
-			santa.E += atoi(&buffer[i_b]);
-			santa.W -= atoi(&buffer[i_b]);
-		} else if (santa.d == 3) {
-			santa.S += atoi(&buffer[i_b]);
-			santa.N -= atoi(&buffer[i_b]);
-		} else if (santa.d == 4) {
-			santa.W += atoi(&buffer[i_b]);
-			santa.E -= atoi(&buffer[i_b]);
+		if (santa.d == 1 && res == -1) {
+			for (int i = atoi(&buffer[i_b]); i && res == -1; i--)
+			{
+				santa.y += 1;
+				if ((res = check_pos(log, len_log, santa)) != -1)
+					printf("%d\n", res);
+				len_log = add_pos(log, santa);
+			}
+		} else if (santa.d == 2 && res == -1) {
+			for (int i = atoi(&buffer[i_b]); i && res == -1; i--)
+			{
+				santa.x += 1;
+				if ((res = check_pos(log, len_log, santa)) != -1)
+					printf("%d\n", res);
+				len_log = add_pos(log, santa);
+			}
+		} else if (santa.d == 3 && res == -1) {
+			for (int i = atoi(&buffer[i_b]); i && res == -1; i--)
+			{
+				santa.y -= 1;
+				if ((res = check_pos(log, len_log, santa)) != -1)
+					printf("%d\n", res);
+				len_log = add_pos(log, santa);
+			}
+		} else if (santa.d == 4 && res == -1) {
+			for (int i = atoi(&buffer[i_b]); i && res == -1; i--)
+			{
+				santa.x -= 1;
+				if ((res = check_pos(log, len_log, santa)) != -1)
+					printf("%d\n", res);
+				len_log = add_pos(log, santa);
+			}
 		}
-		check_pos(log, len_log, santa);
-		len_log	= add_pos(log, santa);
 		while (isdigit(buffer[i_b]))
 			i_b++;
 		while (buffer[i_b] && isalpha(buffer[i_b]) == 0)
@@ -102,14 +122,5 @@ int main(int ac, char **av)
 			i_b++;
 		}
 	}
-	int	res;
-	if (santa.N > 0)
-		res += santa.N;
-	if (santa.S > 0)
-		res += santa.S;
-	if (santa.E > 0)
-		res += santa.E;
-	if (santa.W > 0)
-		res += santa.W;
-//	printf("%d\n", res);
+	//	printf("%d\n", res);
 }
